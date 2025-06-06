@@ -4,6 +4,7 @@ using OxyPlot.Series;
 using OxyPlot;
 using System.Collections.ObjectModel;
 using System.Linq;
+using OxyPlot.Axes;
 
 namespace LagrangePoly.ViewModel
 {
@@ -13,6 +14,10 @@ namespace LagrangePoly.ViewModel
 
         public void AddPoint(double x, double y)
         {
+            foreach (var p in Points)
+            {
+                if (p.X_point == x) return;
+            }
             Points.Add(new PointPairs(Points.Count, x, y));
         }
 
@@ -40,6 +45,10 @@ namespace LagrangePoly.ViewModel
             var model = new PlotModel { Title = "Lagrange Polynomial" };
             model.Legends.Add(new Legend());
 
+            // Добавляем оси с автоматическим масштабированием
+            model.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom });
+            model.Axes.Add(new LinearAxis { Position = AxisPosition.Left });
+
             var pointsSeries = new LineSeries
             {
                 Title = "Points",
@@ -63,13 +72,13 @@ namespace LagrangePoly.ViewModel
                     Color = OxyColors.Blue
                 };
 
-                double minX = Points[0].X_point;
-                double maxX = Points[0].X_point;
-                foreach (var point in Points)
-                {
-                    if (point.X_point < minX) minX = point.X_point;
-                    if (point.X_point > maxX) maxX = point.X_point;
-                }
+                double minX = Points.Min(p => p.X_point);
+                double maxX = Points.Max(p => p.X_point);
+
+                // Добавляем небольшие отступы по краям
+                double padding = (maxX - minX) * 0.1;
+                minX -= padding;
+                maxX += padding;
 
                 double step = (maxX - minX) / 100;
                 for (double x = minX; x <= maxX; x += step)

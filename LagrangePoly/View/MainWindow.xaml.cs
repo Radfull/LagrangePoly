@@ -6,6 +6,7 @@ using System.Windows.Input;
 using OxyPlot;
 using OxyPlot.Series;
 using OxyPlot.Legends;
+using OxyPlot.Axes;
 
 namespace LagrangePoly
 {
@@ -37,6 +38,23 @@ namespace LagrangePoly
             }
         }
 
+        private void PlotView_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left && MyPlot.Model != null)
+            {
+                var position = e.GetPosition(MyPlot);
+
+                var xAxis = MyPlot.Model.DefaultXAxis;
+                var yAxis = MyPlot.Model.DefaultYAxis;
+
+                double x = xAxis.InverseTransform(position.X);
+                double y = yAxis.InverseTransform(position.Y);
+
+                vm.AddPoint(x, y);
+                MyPlot.Model = vm.PlotGraph();
+            }
+        }
+
         private void CheckPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (!(char.IsDigit(e.Text, 0) || (e.Text == ",") || (e.Text == "-")))
@@ -48,7 +66,7 @@ namespace LagrangePoly
         private void ClearPoints(object sender, RoutedEventArgs e)
         {
             vm.Points.Clear();
-            vm.PlotGraph();
+            MyPlot.Model = vm.PlotGraph();
         }
     }
 }
